@@ -57,6 +57,15 @@ if st.button("Search"):
             for entry in results:
                 device = entry.get("device", [{}])[0]
                 openfda = device.get("openfda", {})
+                pma_number = entry.get("pma_pmn_number")
+                hyperlink = ""
+
+                # Create link for 510(k)
+                if pma_number and pma_number.startswith("K"):
+                    hyperlink = f"https://www.accessdata.fda.gov/scripts/cdrh/cfdocs/cfpmn/pmn.cfm?ID={pma_number}"
+                    pma_display = f"[{pma_number}]({hyperlink})"
+                else:
+                    pma_display = pma_number or ""
 
                 records.append({
                     "Manufacturer": device.get("manufacturer_d_name"),
@@ -66,6 +75,7 @@ if st.button("Search"):
                     "UDI DI": device.get("udi_di"),
                     "Device Name (FDA)": openfda.get("device_name"),
                     "Device Class": openfda.get("device_class"),
+                    "510k/PMA Number": pma_display,
                     "Event Type": entry.get("event_type"),
                     "Event Date": entry.get("date_of_event"),
                     "Received Date": entry.get("date_received"),
@@ -73,22 +83,46 @@ if st.button("Search"):
                 })
 
             df = pd.DataFrame(records)
-            st.subheader("📋 Results Table")
-            st.dataframe(df)
 
-            # Pareto Chart: Manufacturer Frequency
-            st.subheader("🏭 Manufacturer Pareto Chart")
-            if "Manufacturer" in df.columns:
-                manufacturer_counts = df["Manufacturer"].value_counts().sort_values(ascending=False)
-                fig, ax = plt.subplots()
-                manufacturer_counts.plot(kind="bar", ax=ax)
-                ax.set_ylabel("Event Count")
-                ax.set_title("Manufacturer Frequency (Pareto)")
-                st.pyplot(fig)
+            st.subheader("📋 Results Table")
+            st.markdown(
+                df.to_markdown(index=False), 
+                unsafe_allow_html=True
+            )
+
+            # Pareto Chart 1: Malfunction Events by Manufacturer
+            st.subheader("📊 Pareto Chart: Malfunction Events by Manufacturer")
+            malfunction_df = df[df["Event Type"] == "Malfunction"]
+            if not malfunction_df.empty:
+                malfunction_counts = malfunction_df["Manufacturer"].value_counts().sort_values(ascending=False)
+                fig1, ax1 = plt.subplots()
+                malfunction_counts.plot(kind="bar", ax=ax1)
+                ax1.set_ylabel("Malfunction Count")
+                ax1.set_title("Malfunction Events (Pareto)")
+                st.pyplot(fig1)
+            else:
+                st.info("No malfunction events found in results.")
+
+            # Pareto Chart 2: Injury Events by Manufacturer
+            st.subheader("📊 Pareto Chart: Injury Events by Manufacturer")
+            injury_df = df[df["Event Type"] == "Injury"]
+            if not injury_df.empty:
+                injury_counts = injury_df["Manufacturer"].value_counts().sort_values(ascending=False)
+                fig2, ax2 = plt.subplots()
+                injury_counts.plot(kind="bar", ax=ax2)
+                ax2.set_ylabel("Injury Count")
+                ax2.set_title("Injury Events (Pareto)")
+                st.pyplot(fig2)
+            else:
+                st.info("No injury events found in results.")
 
             # CSV download
-            csv = df.to_csv(index=False)
-            st.download_button("Download CSV", csv, file_name="maude_results.csv", mime="text/csv")
+            st.download_button(
+                "Download CSV", 
+                df.to_csv(index=False), 
+                file_name="maude_results.csv", 
+                mime="text/csv"
+            )
 
     except requests.exceptions.HTTPError as e:
         st.error(f"❌ HTTP Error: {e}")
