@@ -5,20 +5,31 @@ import pandas as pd
 st.title("🔍 MAUDE Adverse Event Search")
 
 # Search inputs
-search_option = st.selectbox("Search by", ["Device Generic Name", "Product Code", "UDI-DI"])
-search_term = st.text_input("Enter your search term")
+search_option = st.selectbox("Search by", [
+    "Device Generic Name", 
+    "Product Code", 
+    "UDI-DI",
+    "Manufacturer Name"
+])
+
+search_term = st.text_input("Enter your search term (e.g. 'defibrillator' or 'Medtronic Inc')")
 
 limit = st.slider("Number of records to fetch", 1, 100, 25)
 
 if st.button("Search"):
     base_url = "https://api.fda.gov/device/event.json"
-    
+
+    # Format search query
     if search_option == "Device Generic Name":
         query = f"device.generic_name:{search_term}"
     elif search_option == "Product Code":
         query = f"device.device_report_product_code:{search_term}"
     elif search_option == "UDI-DI":
         query = f"device.udi_di:{search_term}"
+    elif search_option == "Manufacturer Name":
+        # Replace spaces with + and wrap in quotes for exact-ish matching
+        formatted_name = search_term.strip().replace(" ", "+")
+        query = f'manufacturer_d_name:"{formatted_name}"'
     else:
         query = ""
 
