@@ -76,14 +76,14 @@ if st.button("Search"):
             st.subheader("📋 Results Table")
             st.dataframe(df)
 
-            # Pareto Chart: Event Type Count
-            st.subheader("📊 Event Type Pareto Chart")
-            if "Event Type" in df.columns:
-                event_counts = df["Event Type"].value_counts().sort_values(ascending=False)
+            # Pareto Chart: Manufacturer Frequency
+            st.subheader("🏭 Manufacturer Pareto Chart")
+            if "Manufacturer" in df.columns:
+                manufacturer_counts = df["Manufacturer"].value_counts().sort_values(ascending=False)
                 fig, ax = plt.subplots()
-                event_counts.plot(kind="bar", ax=ax)
-                ax.set_ylabel("Count")
-                ax.set_title("Event Type Frequency (Pareto)")
+                manufacturer_counts.plot(kind="bar", ax=ax)
+                ax.set_ylabel("Event Count")
+                ax.set_title("Manufacturer Frequency (Pareto)")
                 st.pyplot(fig)
 
             # CSV download
