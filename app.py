@@ -62,7 +62,7 @@ if st.button("Search"):
                 # Create hyperlink if it's a 510k number
                 if pma_number and pma_number.startswith("K"):
                     hyperlink = f"https://www.accessdata.fda.gov/scripts/cdrh/cfdocs/cfpmn/pmn.cfm?ID={pma_number}"
-                    pma_display = f'<a href="{hyperlink}" target="_blank">{pma_number}</a>'
+                    pma_display = f"[{pma_number}]({hyperlink})"
                 else:
                     pma_display = pma_number or ""
 
@@ -83,34 +83,16 @@ if st.button("Search"):
 
             df = pd.DataFrame(records)
 
-            # 📋 Compact Styled Table with Clickable 510k Links
+            # 📋 Markdown Table with Clickable 510k Links
             st.subheader("📋 Results Table with 510(k)/PMA Links")
+            st.markdown(df.to_markdown(index=False), unsafe_allow_html=True)
 
-            html_table = df.to_html(escape=False, index=False)
-            custom_css = """
-            <style>
-            table {
-                font-size: 14px;
-                width: 100%;
-                table-layout: auto;
-                border-collapse: collapse;
-            }
-            th, td {
-                text-align: left;
-                padding: 6px;
-                word-wrap: break-word;
-                border-bottom: 1px solid #ddd;
-            }
-            </style>
-            """
-            st.markdown(custom_css + html_table, unsafe_allow_html=True)
-
-            # 📊 Pareto Chart: Malfunction Events
+            # 📊 Pareto Chart: Malfunction Events by Manufacturer
             st.subheader("📊 Pareto Chart: Malfunction Events by Manufacturer")
             malfunction_df = df[df["Event Type"] == "Malfunction"]
             if not malfunction_df.empty:
                 malfunction_counts = malfunction_df["Manufacturer"].value_counts().sort_values(ascending=False)
-                fig1, ax1 = plt.subplots(figsize=(12, 3))
+                fig1, ax1 = plt.subplots(figsize=(12, 3))  # Wide and short
                 malfunction_counts.plot(kind="bar", ax=ax1)
                 ax1.set_ylabel("Malfunction Count")
                 ax1.set_title("Malfunction Events (Pareto)")
@@ -118,12 +100,12 @@ if st.button("Search"):
             else:
                 st.info("No malfunction events found.")
 
-            # 📊 Pareto Chart: Injury Events
+            # 📊 Pareto Chart: Injury Events by Manufacturer
             st.subheader("📊 Pareto Chart: Injury Events by Manufacturer")
             injury_df = df[df["Event Type"] == "Injury"]
             if not injury_df.empty:
                 injury_counts = injury_df["Manufacturer"].value_counts().sort_values(ascending=False)
-                fig2, ax2 = plt.subplots(figsize=(12, 3))
+                fig2, ax2 = plt.subplots(figsize=(12, 3))  # Wide and short
                 injury_counts.plot(kind="bar", ax=ax2)
                 ax2.set_ylabel("Injury Count")
                 ax2.set_title("Injury Events (Pareto)")
