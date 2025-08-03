@@ -3,7 +3,6 @@ import requests
 import pandas as pd
 import matplotlib.pyplot as plt
 from datetime import date
-from st_aggrid import AgGrid, GridOptionsBuilder
 
 st.set_page_config(page_title="MAUDE Search", layout="wide")
 st.title("🔍 MAUDE Adverse Event Search")
@@ -55,13 +54,12 @@ if st.button("Search"):
             st.warning("No results found.")
         else:
             records = []
-            link_records = []
             for entry in results:
                 device = entry.get("device", [{}])[0]
                 openfda = device.get("openfda", {})
                 pma_number = entry.get("pma_pmn_number")
 
-                # Create display string and hyperlink
+                # Create hyperlink if it's a 510k number
                 if pma_number and pma_number.startswith("K"):
                     hyperlink = f"https://www.accessdata.fda.gov/scripts/cdrh/cfdocs/cfpmn/pmn.cfm?ID={pma_number}"
                     pma_display = f"[{pma_number}]({hyperlink})"
@@ -76,43 +74,25 @@ if st.button("Search"):
                     "UDI DI": device.get("udi_di"),
                     "Device Name (FDA)": openfda.get("device_name"),
                     "Device Class": openfda.get("device_class"),
-                    "510k/PMA Number": pma_number or "",
+                    "510k/PMA Number": pma_display,
                     "Event Type": entry.get("event_type"),
                     "Event Date": entry.get("date_of_event"),
                     "Received Date": entry.get("date_received"),
                     "FEI Number": "; ".join(openfda.get("fei_number", [])),
                 })
 
-                if pma_number and pma_number.startswith("K"):
-                    link_records.append({
-                        "Device": device.get("brand_name") or "Device",
-                        "Link": pma_display,
-                    })
-
             df = pd.DataFrame(records)
-            df_links = pd.DataFrame(link_records)
 
-            # 📋 Interactive AgGrid Table (no hyperlinks)
-            st.subheader("📋 Results Table (Filterable)")
-            df_display = df.copy()
-            gb = GridOptionsBuilder.from_dataframe(df_display)
-            gb.configure_default_column(filter=True, sortable=True, resizable=True)
-            gb.configure_pagination()
-            grid_options = gb.build()
-            AgGrid(df_display, gridOptions=grid_options, height=400, fit_columns_on_grid_load=True)
+            # 📋 Markdown Table with Clickable 510k Links
+            st.subheader("📋 Results Table with 510(k)/PMA Links")
+            st.markdown(df.to_markdown(index=False), unsafe_allow_html=True)
 
-            # 🔗 510k Links Section
-            if not df_links.empty:
-                st.subheader("🔗 510(k) Hyperlinks")
-                for _, row in df_links.iterrows():
-                    st.markdown(f"- {row['Device']}: {row['Link']}", unsafe_allow_html=True)
-
-            # 📊 Pareto Chart: Malfunction Events
+            # 📊 Pareto Chart: Malfunction Events by Manufacturer
             st.subheader("📊 Pareto Chart: Malfunction Events by Manufacturer")
             malfunction_df = df[df["Event Type"] == "Malfunction"]
             if not malfunction_df.empty:
                 malfunction_counts = malfunction_df["Manufacturer"].value_counts().sort_values(ascending=False)
-                fig1, ax1 = plt.subplots()
+                fig1, ax1 = plt.subplots(figsize=(12, 3))  # Wide and short
                 malfunction_counts.plot(kind="bar", ax=ax1)
                 ax1.set_ylabel("Malfunction Count")
                 ax1.set_title("Malfunction Events (Pareto)")
@@ -120,12 +100,12 @@ if st.button("Search"):
             else:
                 st.info("No malfunction events found.")
 
-            # 📊 Pareto Chart: Injury Events
+            # 📊 Pareto Chart: Injury Events by Manufacturer
             st.subheader("📊 Pareto Chart: Injury Events by Manufacturer")
             injury_df = df[df["Event Type"] == "Injury"]
             if not injury_df.empty:
                 injury_counts = injury_df["Manufacturer"].value_counts().sort_values(ascending=False)
-                fig2, ax2 = plt.subplots()
+                fig2, ax2 = plt.subplots(figsize=(12, 3))  # Wide and short
                 injury_counts.plot(kind="bar", ax=ax2)
                 ax2.set_ylabel("Injury Count")
                 ax2.set_title("Injury Events (Pareto)")
