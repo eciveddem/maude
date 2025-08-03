@@ -145,6 +145,7 @@ with tab3:
     df = st.session_state.results_df
     if not df.empty:
         st.markdown("#### 📊 Event Pareto Charts")
+
         malfunction_df = df[df["Event Type"] == "Malfunction"]
         if not malfunction_df.empty:
             fig1, ax1 = plt.subplots(figsize=(12, 3))
@@ -160,5 +161,12 @@ with tab3:
             ax2.set_title("Injury Events by Manufacturer")
             ax2.set_ylabel("Count")
             st.pyplot(fig2)
+
+        if "Product Code" in df.columns:
+            fig3, ax3 = plt.subplots(figsize=(12, 3))
+            df["Product Code"].value_counts().plot(kind="bar", ax=ax3)
+            ax3.set_title("Events by Product Code")
+            ax3.set_ylabel("Count")
+            st.pyplot(fig3)
     else:
         st.info("No charts to show.")
