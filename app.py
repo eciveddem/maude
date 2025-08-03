@@ -115,8 +115,7 @@ if search_button:
                 "Event Date": entry.get("date_of_event"),
                 "Received Date": entry.get("date_received"),
                 "FEI Number": "; ".join(openfda.get("fei_number", [])),
-                "Event Description": (entry.get("event_text") or "")[:150] + ("..." if entry.get("event_text") and len(entry.get("event_text")) > 150 else "")
-            })
+                            })
 
         st.session_state.results_df = pd.DataFrame(records)
     except Exception as e:
