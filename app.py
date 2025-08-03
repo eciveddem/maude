@@ -84,7 +84,6 @@ if search_button or pull_malfunctions_button or pull_injuries_button:
         url = f"{base_url}?search=event_type:Malfunction&sort=date_received:desc&limit=100"
     elif pull_injuries_button:
         url = f"{base_url}?search=event_type:Injury&sort=date_received:desc&limit=100"
-        url = f"{base_url}?sort=date_received:desc&limit=100"
     else:
         if search_option == "Device Generic Name":
             query = f"device.generic_name:{search_term}"
@@ -165,9 +164,9 @@ with tab3:
 
         if "Product Code" in df.columns:
             fig3, ax3 = plt.subplots(figsize=(12, 3))
-df["Product Code"].value_counts().plot(kind="bar", ax=ax3)
-ax3.set_title("Events by Product Code")
-ax3.set_ylabel("Count")
-st.pyplot(fig3)
+            df["Product Code"].value_counts().plot(kind="bar", ax=ax3)
+            ax3.set_title("Events by Product Code")
+            ax3.set_ylabel("Count")
+            st.pyplot(fig3)
     else:
         st.info("No charts to show.")
