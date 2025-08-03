@@ -55,13 +55,13 @@ if st.button("Search"):
             st.warning("No results found.")
         else:
             records = []
+            link_records = []
             for entry in results:
                 device = entry.get("device", [{}])[0]
                 openfda = device.get("openfda", {})
                 pma_number = entry.get("pma_pmn_number")
-                hyperlink = ""
 
-                # Create link for 510(k) numbers
+                # Create display string and hyperlink
                 if pma_number and pma_number.startswith("K"):
                     hyperlink = f"https://www.accessdata.fda.gov/scripts/cdrh/cfdocs/cfpmn/pmn.cfm?ID={pma_number}"
                     pma_display = f"[{pma_number}]({hyperlink})"
@@ -76,22 +76,36 @@ if st.button("Search"):
                     "UDI DI": device.get("udi_di"),
                     "Device Name (FDA)": openfda.get("device_name"),
                     "Device Class": openfda.get("device_class"),
-                    "510k/PMA Number": pma_display,
+                    "510k/PMA Number": pma_number or "",
                     "Event Type": entry.get("event_type"),
                     "Event Date": entry.get("date_of_event"),
                     "Received Date": entry.get("date_received"),
                     "FEI Number": "; ".join(openfda.get("fei_number", [])),
                 })
 
-            df = pd.DataFrame(records)
+                if pma_number and pma_number.startswith("K"):
+                    link_records.append({
+                        "Device": device.get("brand_name") or "Device",
+                        "Link": pma_display,
+                    })
 
-            # 📋 Interactive Filterable Table
+            df = pd.DataFrame(records)
+            df_links = pd.DataFrame(link_records)
+
+            # 📋 Interactive AgGrid Table (no hyperlinks)
             st.subheader("📋 Results Table (Filterable)")
-            gb = GridOptionsBuilder.from_dataframe(df)
+            df_display = df.copy()
+            gb = GridOptionsBuilder.from_dataframe(df_display)
             gb.configure_default_column(filter=True, sortable=True, resizable=True)
             gb.configure_pagination()
             grid_options = gb.build()
-            AgGrid(df, gridOptions=grid_options, height=400, fit_columns_on_grid_load=True)
+            AgGrid(df_display, gridOptions=grid_options, height=400, fit_columns_on_grid_load=True)
+
+            # 🔗 510k Links Section
+            if not df_links.empty:
+                st.subheader("🔗 510(k) Hyperlinks")
+                for _, row in df_links.iterrows():
+                    st.markdown(f"- {row['Device']}: {row['Link']}", unsafe_allow_html=True)
 
             # 📊 Pareto Chart: Malfunction Events
             st.subheader("📊 Pareto Chart: Malfunction Events by Manufacturer")
