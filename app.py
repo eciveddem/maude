@@ -2,17 +2,17 @@ import streamlit as st
 import requests
 import pandas as pd
 
+st.set_page_config(page_title="MAUDE Search", layout="wide")
 st.title("🔍 MAUDE Adverse Event Search")
 
 # Search inputs
 search_option = st.selectbox("Search by", [
     "Device Generic Name", 
     "Product Code", 
-    "UDI-DI",
-    "Manufacturer Name"
+    "UDI-DI"
 ])
 
-search_term = st.text_input("Enter your search term (e.g. 'defibrillator' or 'Medtronic Inc')")
+search_term = st.text_input("Enter your search term (e.g. 'defibrillator', 'LWS', or '00643169356566')")
 
 limit = st.slider("Number of records to fetch", 1, 100, 25)
 
@@ -26,14 +26,11 @@ if st.button("Search"):
         query = f"device.device_report_product_code:{search_term}"
     elif search_option == "UDI-DI":
         query = f"device.udi_di:{search_term}"
-    elif search_option == "Manufacturer Name":
-        # Replace spaces with + and wrap in quotes for exact-ish matching
-        formatted_name = search_term.strip().replace(" ", "+")
-        query = f'manufacturer_d_name:"{formatted_name}"'
     else:
         query = ""
 
-    url = f"{base_url}?search={query}&limit={limit}"
+    # Add sorting by date_received descending
+    url = f"{base_url}?search={query}&sort=date_received:desc&limit={limit}"
 
     try:
         response = requests.get(url)
