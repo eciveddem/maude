@@ -27,20 +27,20 @@ table {
     font-size: 14px;
     width: 100%;
     border-collapse: collapse;
-    color: #111; /* ensure text is visible */
+    background-color: #000;
+    color: #fff;
 }
 th, td {
-    border-bottom: 1px solid #e5e5e5;
+    border-bottom: 1px solid #444;
     padding: 8px 12px;
     text-align: left;
-    color: #111; /* ensure text is visible */
 }
 th {
-    background-color: #f8f8f8;
+    background-color: #222;
     font-weight: 600;
 }
 tr:nth-child(even) {
-    background-color: #f2f2f2;
+    background-color: #111;
 }
 </style>
 """, unsafe_allow_html=True)
