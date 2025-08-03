@@ -2,6 +2,7 @@ import streamlit as st
 import requests
 import pandas as pd
 import matplotlib.pyplot as plt
+import plotly.express as px
 from datetime import date
 
 st.set_page_config(page_title="Apple-Style MAUDE App", layout="wide")
@@ -163,10 +164,17 @@ with tab3:
             st.pyplot(fig2)
 
         if "Product Code" in df.columns:
-            fig3, ax3 = plt.subplots(figsize=(12, 3))
-            df["Product Code"].value_counts().plot(kind="bar", ax=ax3)
-            ax3.set_title("Events by Product Code")
-            ax3.set_ylabel("Count")
-            st.pyplot(fig3)
+            code_counts = df["Product Code"].value_counts().reset_index()
+            code_counts.columns = ["Product Code", "Count"]
+            code_counts["Link"] = code_counts["Product Code"].apply(lambda x: f"https://www.accessdata.fda.gov/scripts/cdrh/cfdocs/cfpcd/classification.cfm?productcode={x}")
+            fig3 = px.bar(code_counts, x="Product Code", y="Count", hover_name="Product Code",
+                          title="Events by Product Code",
+                          custom_data=["Link"])
+            fig3.update_traces(marker_color="#007aff", hovertemplate='<b>%{x}</b><br>Count: %{y}<br><extra></extra>',
+                               hoverlabel=dict(bgcolor="white", font_size=14),
+                               hoverinfo="text")
+            fig3.update_layout(clickmode='event+select', height=300)
+            st.plotly_chart(fig3, use_container_width=True)
+            st.markdown("Click on a product code above to open its FDA classification page.")
     else:
         st.info("No charts to show.")
