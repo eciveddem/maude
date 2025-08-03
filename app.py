@@ -68,14 +68,21 @@ with tab1:
         limit = st.slider("Number of records", 1, 100, 25)
 
     search_button = st.button("🔎 Search")
-pull_recent_button = st.button("📥 Pull 100 Most Recent")
+col_recent1, col_recent2 = st.columns(2)
+with col_recent1:
+    pull_malfunctions_button = st.button("📥 Pull 100 Malfunctions")
+with col_recent2:
+    pull_injuries_button = st.button("📥 Pull 100 Injuries")
 
 if 'results_df' not in st.session_state:
     st.session_state.results_df = pd.DataFrame()
 
-if search_button or pull_recent_button:
+if search_button or pull_malfunctions_button or pull_injuries_button:
     base_url = "https://api.fda.gov/device/event.json"
-    if pull_recent_button:
+    if pull_malfunctions_button:
+        url = f"{base_url}?search=event_type:Malfunction&sort=date_received:desc&limit=100"
+    elif pull_injuries_button:
+        url = f"{base_url}?search=event_type:Injury&sort=date_received:desc&limit=100"
         url = f"{base_url}?sort=date_received:desc&limit=100"
     else:
         if search_option == "Device Generic Name":
