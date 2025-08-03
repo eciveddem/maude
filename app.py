@@ -2,7 +2,6 @@ import streamlit as st
 import requests
 import pandas as pd
 import matplotlib.pyplot as plt
-import plotly.express as px
 from datetime import date
 
 st.set_page_config(page_title="Apple-Style MAUDE App", layout="wide")
