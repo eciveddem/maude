@@ -68,25 +68,29 @@ with tab1:
         limit = st.slider("Number of records", 1, 100, 25)
 
     search_button = st.button("🔎 Search")
+pull_recent_button = st.button("📥 Pull 100 Most Recent")
 
 if 'results_df' not in st.session_state:
     st.session_state.results_df = pd.DataFrame()
 
-if search_button:
+if search_button or pull_recent_button:
     base_url = "https://api.fda.gov/device/event.json"
-    if search_option == "Device Generic Name":
-        query = f"device.generic_name:{search_term}"
-    elif search_option == "Product Code":
-        query = f"device.device_report_product_code:{search_term}"
-    elif search_option == "UDI-DI":
-        query = f"device.udi_di:{search_term}"
+    if pull_recent_button:
+        url = f"{base_url}?sort=date_received:desc&limit=100"
     else:
-        query = ""
+        if search_option == "Device Generic Name":
+            query = f"device.generic_name:{search_term}"
+        elif search_option == "Product Code":
+            query = f"device.device_report_product_code:{search_term}"
+        elif search_option == "UDI-DI":
+            query = f"device.udi_di:{search_term}"
+        else:
+            query = ""
 
-    start_str = start_date.strftime("%Y%m%d")
-    end_str = end_date.strftime("%Y%m%d")
-    query += f"+AND+date_received:[{start_str}+TO+{end_str}]"
-    url = f"{base_url}?search={query}&sort=date_received:desc&limit={limit}"
+        start_str = start_date.strftime("%Y%m%d")
+        end_str = end_date.strftime("%Y%m%d")
+        query += f"+AND+date_received:[{start_str}+TO+{end_str}]"
+        url = f"{base_url}?search={query}&sort=date_received:desc&limit={limit}"
 
     try:
         response = requests.get(url)
@@ -115,7 +119,7 @@ if search_button:
                 "Event Date": entry.get("date_of_event"),
                 "Received Date": entry.get("date_received"),
                 "FEI Number": "; ".join(openfda.get("fei_number", [])),
-                            })
+            })
 
         st.session_state.results_df = pd.DataFrame(records)
     except Exception as e:
