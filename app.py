@@ -27,14 +27,17 @@ table {
     font-size: 14px;
     width: 100%;
     border-collapse: collapse;
+    color: #111; /* ensure text is visible */
 }
 th, td {
     border-bottom: 1px solid #e5e5e5;
     padding: 8px 12px;
     text-align: left;
+    color: #111; /* ensure text is visible */
 }
 th {
     background-color: #f8f8f8;
+    font-weight: 600;
 }
 tr:nth-child(even) {
     background-color: #f2f2f2;
