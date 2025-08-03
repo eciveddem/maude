@@ -2,9 +2,18 @@ import streamlit as st
 import requests
 import pandas as pd
 import matplotlib.pyplot as plt
+import plotly.express as px
 from datetime import date
 
 st.set_page_config(page_title="Apple-Style MAUDE App", layout="wide")
+
+st.markdown("""
+<div style='text-align: right; padding: 0.5rem;'>
+    <a href='https://www.buymeacoffee.com/eciveddem' target='_blank'>
+        <img src='https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png' height='32' />
+    </a>
+</div>
+""", unsafe_allow_html=True)
 
 # --- Apple-like styling ---
 st.markdown("""
