@@ -78,9 +78,9 @@ with tab1:
     search_button = st.button("🔎 Search")
 col_recent1, col_recent2 = st.columns(2)
 with col_recent1:
-    pull_malfunctions_button = st.button("📥 Pull 100 Malfunctions")
+    pull_malfunctions_button = st.button("📥 Pull 100 Recent Malfunctions")
 with col_recent2:
-    pull_injuries_button = st.button("📥 Pull 100 Injuries")
+    pull_injuries_button = st.button("📥 Pull 100 Recent Injuries")
 
 if 'results_df' not in st.session_state:
     st.session_state.results_df = pd.DataFrame()
